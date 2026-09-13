@@ -1,0 +1,14 @@
+Caddyfile
+caddy.exe
+lol/*
+!lol/index.html
+warroom/state.json
+warroom/state.json.bak
+warroom/state.json.new
+warroom/server.log
+warroom/password.txt
+warroom/private.txt
+warroom/.secret
+warroom/uploads/
+warroom/backups/
+warroom/__pycache__/

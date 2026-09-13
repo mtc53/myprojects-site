@@ -1,0 +1,60 @@
+# myprojects.cc - all three sites, one machine, one folder.
+#
+# Paths are relative to this file, so the folder works wherever you put it.
+# Caddy owns 80 and 443 and gets its own certificates, so win-acme is no
+# longer involved. The War Room runs on 127.0.0.1:8081, reachable only
+# through here.
+#
+# The password hash comes from:  caddy hash-password
+
+{
+	email you@example.com
+}
+
+(locked) {
+	basic_auth {
+		user PUT_YOUR_HASH_HERE
+	}
+}
+
+(hardened) {
+	header {
+		X-Content-Type-Options nosniff
+		Referrer-Policy no-referrer
+		-Server
+	}
+	encode gzip
+}
+
+myprojects.cc, www.myprojects.cc {
+	import hardened
+	root * site
+	file_server
+}
+
+lol.myprojects.cc {
+	import locked
+	import hardened
+	header X-Robots-Tag "noindex, nofollow"
+
+	# What League Vault publishes, served under /vault/ so the wrapper
+	# around it survives the next publish.
+	handle_path /vault* {
+		root * lol
+		file_server {
+			index index.html dashboard.html
+		}
+	}
+
+	handle {
+		root * lolwrap
+		file_server
+	}
+}
+
+rok.myprojects.cc {
+	import locked
+	import hardened
+	header X-Robots-Tag "noindex, nofollow"
+	reverse_proxy 127.0.0.1:8081
+}

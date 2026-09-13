@@ -1,0 +1,1928 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kingdom War Room</title>
+</head>
+<body>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root{
+    --ground:#0a0a0a; --panel:#121212; --raised:#191919; --line:#1f1f1f;
+    --ink:#fafafa; --dim:#a3a3a3; --faint:#6b6b6b;
+    --brass:#fafafa; --brass-dim:#2e2e2e;
+    --good:#7fb98c; --warn:#c79a5f; --crit:#c0666c; --steel:#8a8a8a;
+    --S:#fafafa; --A:#cfcfcf; --B:#9a9a9a; --C:#6b6b6b; --D:#4d4d4d; --F:#363636;
+    --display:ui-sans-serif,-apple-system,"Segoe UI",Inter,Roboto,system-ui,sans-serif;
+    --body:ui-sans-serif,-apple-system,"Segoe UI",Inter,Roboto,system-ui,sans-serif;
+    --mono:ui-monospace,"SF Mono","Cascadia Mono",Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--body);
+       font-size:14px;line-height:1.55;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1760px;margin:0 auto;padding:38px 26px 72px;
+        display:flex;flex-direction:column;gap:22px}
+  .num,td.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+  button{font-family:var(--display);font-weight:500;letter-spacing:0;
+         font-size:12px;cursor:pointer;border-radius:4px;
+         padding:8px 15px;border:1px solid var(--line);background:var(--raised);color:var(--ink)}
+  button:hover{border-color:var(--brass);color:var(--brass)}
+  button.primary{background:var(--raised);border-color:var(--faint);color:var(--ink)}
+  button.primary:hover{border-color:var(--ink);color:var(--ink)}
+  button.danger:hover{border-color:var(--crit);color:var(--crit)}
+  button:disabled{opacity:.4;cursor:not-allowed}
+  button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{
+    outline:2px solid var(--brass);outline-offset:1px}
+
+  header{display:flex;flex-wrap:wrap;align-items:flex-end;gap:14px;
+         border-bottom:none;padding-bottom:6px}
+  h1{font-family:var(--display);font-weight:600;font-size:23px;letter-spacing:-.02em;
+     margin:0;line-height:1.15}
+  h1 em{font-style:normal;color:var(--faint);font-weight:500}
+  .sub{color:var(--dim);font-family:var(--mono);font-size:12px;margin-left:auto;text-align:right}
+  .home{display:inline-flex;align-items:center;gap:6px;text-decoration:none;
+        font-family:var(--mono);font-size:11px;color:var(--faint);
+        border:1px solid var(--line);border-radius:3px;padding:4px 9px;
+        align-self:center;transition:color .15s,border-color .15s}
+  .home:hover,.home:focus-visible{color:var(--ink);border-color:var(--brass-dim);outline:none}
+  .home svg{width:12px;height:12px}
+  h2{font-family:var(--display);font-size:13px;letter-spacing:.02em;
+     letter-spacing:1.6px;color:var(--dim);margin:0 0 11px;font-weight:500}
+  section{display:flex;flex-direction:column}
+
+  .chipbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .modes{display:inline-flex;gap:0;margin-right:8px}
+  .modes .chip{border-radius:0}
+  .modes .chip:first-child{border-radius:2px 0 0 2px}
+  .modes .chip:last-child{border-radius:0 2px 2px 0;margin-left:-1px}
+  .chip{background:none;border:1px solid transparent;color:var(--faint);
+        border-radius:5px;padding:6px 12px;cursor:pointer;font-size:11.5px;
+        font-family:var(--display);font-weight:500;letter-spacing:.01em;text-transform:none;
+        transition:color .15s,background .15s}
+  .chip:hover{color:var(--ink);background:var(--panel)}
+  .chip.on{background:var(--raised);border-color:transparent;color:var(--ink)}
+  .status{font-family:var(--mono);font-size:11.5px;padding:4px 2px;border-radius:0;
+          border:none;color:var(--faint);white-space:nowrap}
+  .status.ok{color:var(--good);border-color:#2c5439}
+  .status.busy{color:var(--brass);border-color:var(--brass-dim)}
+  .status.err{color:var(--crit);border-color:#5a2c30}
+
+  details.tool{background:none;border:none;border-top:1px solid var(--line);border-radius:0}
+  details.tool>summary{cursor:pointer;padding:13px 2px;font-family:var(--display);
+      font-size:12.5px;text-transform:none;letter-spacing:.01em;color:var(--dim);
+      font-weight:500;list-style:none;display:flex;align-items:center;gap:10px;
+      transition:color .15s}
+  details.tool>summary:hover{color:var(--ink)}
+  details.tool>summary::-webkit-details-marker{display:none}
+  details.tool>summary::before{content:"\25B8";transition:transform .15s}
+  details.tool[open]>summary::before{transform:rotate(90deg)}
+  .toolbody{padding:2px 2px 20px;display:flex;flex-direction:column;gap:14px}
+
+  .drop{border:2px dashed var(--line);border-radius:3px;padding:24px;text-align:center;
+        color:var(--dim);background:var(--ground);transition:border-color .15s}
+  .drop.over{border-color:var(--brass);color:var(--brass)}
+  .drop p{margin:6px 0 0;font-size:12.5px;color:var(--faint)}
+
+  .weeklist{display:flex;flex-direction:column;gap:7px}
+  .weekrow{display:flex;align-items:center;gap:10px;background:var(--raised);
+           border:1px solid var(--line);border-left:3px solid var(--brass-dim);
+           border-radius:2px;padding:8px 11px}
+  .weekrow input{flex:1;min-width:80px;background:var(--ground);border:1px solid var(--line);
+                 color:var(--ink);border-radius:2px;padding:5px 8px;font-family:var(--body);
+                 font-size:13px}
+  .weekrow .meta{font-family:var(--mono);font-size:11px;color:var(--faint);white-space:nowrap}
+
+  .wgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:10px}
+  .wfield{display:flex;align-items:center;gap:9px;background:var(--raised);
+          border:1px solid var(--line);border-radius:2px;padding:7px 11px}
+  .wfield label{flex:1;font-size:12.5px;color:var(--dim)}
+  .wfield input{width:62px;background:var(--ground);border:1px solid var(--line);
+                color:var(--ink);border-radius:2px;padding:5px 7px;font-family:var(--mono);
+                font-size:13px;text-align:right}
+  .wfield .pct{width:38px;text-align:right;font-family:var(--mono);font-size:11px;color:var(--faint)}
+
+  .cards{display:flex;flex-wrap:wrap;gap:14px 46px;padding:2px 0 6px}
+  .card{background:none;border:none;padding:0;display:flex;flex-direction:column;gap:3px;
+        min-width:132px;max-width:210px;flex:1 1 auto}
+  .card .k{color:var(--dim);font-size:10.5px;text-transform:none;letter-spacing:.01em;
+           font-family:var(--display);font-weight:500}
+  .card .v{font-size:25px;font-weight:600;font-family:var(--mono);line-height:1.2}
+  .card .n{font-size:11.5px;color:var(--faint);white-space:normal;line-height:1.45}
+
+  .panel{background:none;border:none;border-radius:0;overflow:hidden}
+  .scroll{overflow-x:auto;max-height:76vh;overflow-y:auto}
+  table{width:100%;border-collapse:collapse;font-size:12.5px}
+  th,td{padding:10px 8px;text-align:left;border-bottom:1px solid #161616;white-space:nowrap}
+
+  .panel th,.panel td{border-right:none}
+  th{font-family:var(--display);font-weight:550;color:var(--dim);font-size:11px;
+     text-transform:none;letter-spacing:.01em;cursor:pointer;user-select:none;
+     position:sticky;top:0;background:var(--ground);z-index:2;
+     border-bottom:1px solid var(--line)}
+  th:hover{color:var(--ink)}
+  th.sorted{color:var(--brass)}
+  th.sorted::after{content:" \25BC";font-size:8px}
+  th.sorted.asc::after{content:" \25B2"}
+  tbody tr{border-left:3px solid transparent}
+  tbody tr:hover{background:#141414}
+  td.num{text-align:right}
+
+  #memberTable{table-layout:auto;width:auto;min-width:0}
+  #memberTable th,#memberTable td{padding-left:calc(8px + var(--spread,0px));
+                                  padding-right:calc(8px + var(--spread,0px))}
+  #memberTable td .sub2{margin-left:4px}
+
+  #memberTable th.status{width:1px}
+  #memberTable td.status{white-space:normal;max-width:104px;line-height:1.35}
+  #memberTable td.status .flag{margin-bottom:2px}
+  tr.sev-crit{border-left-color:var(--crit)}
+  tr.sev-warn{border-left-color:var(--warn)}
+  tr.sev-low{border-left-color:var(--brass-dim)}
+
+  .tier{display:inline-block;min-width:21px;text-align:center;font-weight:600;
+        font-family:var(--display);border-radius:3px;padding:1px 6px;font-size:11.5px;color:#0a0a0a}
+  .tier.S{background:var(--S)} .tier.A{background:var(--A)} .tier.B{background:var(--B)}
+  .tier.C{background:var(--C)} .tier.D{background:var(--D)} .tier.F{background:var(--F)}
+  .bar{position:relative;background:none;border:none;height:16px;min-width:104px;
+       display:flex;align-items:center}
+  .bar::before{content:"";position:absolute;left:0;right:46px;height:4px;
+               background:#1c1c1c;border-radius:3px}
+  .bar i{position:absolute;left:0;height:4px;border-radius:3px;background:var(--dim);
+         max-width:calc(100% - 46px)}
+  .bar b{position:absolute;right:0;font-size:11.5px;font-weight:600;line-height:16px;
+         font-family:var(--mono);color:var(--ink)}
+  .up{color:var(--good)} .down{color:var(--crit)} .flat{color:var(--faint)}
+  .sub2{font-size:10.5px;color:var(--faint);font-family:var(--mono)}
+
+  .flag{display:inline-block;font-size:9.5px;font-weight:600;letter-spacing:.5px;
+        font-family:var(--display);text-transform:none;
+        padding:1px 5px;border-radius:2px;margin-right:3px;border:1px solid}
+  .flag.DEAD{color:var(--crit);border-color:#5a2c30;background:#2a1a1d}
+  .flag.INACTIVE{color:var(--warn);border-color:#5a4229;background:#2a2119}
+  .flag.LOW{color:var(--brass);border-color:#544224;background:#26211a}
+  .flag.NO-SUPPORT,.flag.NO-BASELINE{color:var(--dim);border-color:#394054;background:#1e2230}
+
+  .controls{display:flex;gap:9px;flex-wrap:wrap;align-items:center;margin-bottom:11px}
+  input[type=search],input[type=number],select{background:var(--raised);border:1px solid var(--line);
+      color:var(--ink);border-radius:2px;padding:8px 11px;font-size:13px;font-family:var(--body)}
+  input[type=search]{min-width:215px}
+  .topx{display:flex;align-items:center;gap:8px;background:var(--raised);
+        border:1px solid var(--brass-dim);border-radius:2px;padding:4px 6px 4px 13px}
+  .topx label{font-family:var(--display);font-weight:500;font-size:11px;
+      text-transform:none;letter-spacing:.01em;color:var(--dim)}
+  #topXInput{width:56px;text-align:center;font-family:var(--mono);font-size:16px;
+      font-weight:600;color:var(--brass);background:var(--ground);
+      border:1px solid var(--brass-dim);border-radius:2px;padding:6px}
+  .count{color:var(--faint);font-size:12px;margin-left:auto;font-family:var(--mono)}
+
+  tr.detail>td{background:var(--raised);white-space:normal;padding:15px 18px}
+  .grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:20px}
+  .grid2>div{min-width:0;overflow-wrap:anywhere}
+  .grid2>div>b{font-family:var(--display);font-size:11.5px;text-transform:none;
+        letter-spacing:.01em;color:var(--brass);font-weight:500}
+
+  .mrow{display:flex;align-items:center;gap:8px;margin:5px 0;font-size:12px;min-width:0}
+  .mrow .lbl{flex:0 1 118px;min-width:0;color:var(--dim);
+             white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .mrow .val{flex:0 0 auto;min-width:58px;text-align:right;color:var(--faint);
+             font-family:var(--mono);white-space:nowrap}
+  .mini{flex:1 1 36px;background:var(--ground);height:8px;border-radius:2px;
+        position:relative;min-width:24px;border:1px solid var(--line)}
+  .mini i{position:absolute;inset:0 auto 0 0;background:var(--steel);border-radius:1px}
+  .expander{cursor:pointer}
+  .expander:hover .nm{color:var(--brass)}
+  .note{color:var(--faint);font-size:12px;margin:9px 0 0}
+  .banner{background:none;border:none;border-left:2px solid var(--line);
+          color:#e2cd9f;padding:11px 15px;border-radius:3px;font-size:13px}
+  .banner.bad{background:#241a1b;border-color:#5a2c30;color:#e6b3b3}
+  .split{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  .split>*,.grid2>*,.cards>*,.wgrid>*{min-width:0}
+  @media(max-width:900px){.split{grid-template-columns:1fr}.mrow .lbl{flex-basis:98px}
+    .sub{margin-left:0;text-align:left}}
+  footer{padding-top:15px;border-top:1px solid var(--line);color:var(--faint);
+         font-size:11.5px;font-family:var(--mono)}
+  .empty{padding:40px 20px;text-align:center;color:var(--dim)}
+  .faq{max-width:70ch;display:flex;flex-direction:column;gap:2px}
+  .faq h3{font-family:var(--display);font-size:13px;text-transform:none;
+          letter-spacing:.01em;color:var(--brass);font-weight:500;
+          margin:16px 0 4px}
+  .faq h3:first-child{margin-top:0}
+  .faq p{margin:0 0 8px;color:var(--dim);font-size:13.5px}
+  .faq ul{margin:0 0 10px;padding-left:18px;color:var(--dim);font-size:13.5px}
+  .faq li{margin:3px 0}
+  .faq b{color:var(--ink);font-weight:600}
+  @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Kingdom <em>War Room</em></h1>
+    <a class="home" href="https://myprojects.cc/">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"
+           ><path d="M19 12H5M12 19l-7-7 7-7"/></svg>myprojects</a>
+    <div class="sub" id="subtitle">loading&hellip;</div>
+  </header>
+
+  <div id="notice"></div>
+
+  <details class="tool" id="helpTool">
+    <summary>How this works &ndash; read me first</summary>
+    <div class="toolbody">
+      <div class="faq">
+        <h3>What is this?</h3>
+        <p>Every member of our kingdom, ranked on what they actually did
+        this week. It reads the weekly kingdom export straight from the
+        spreadsheet &ndash; nobody has to add anything up by hand.</p>
+
+        <h3>How do I add a new week?</h3>
+        <p>Open <b>Weekly spreadsheets</b> above, then drag the <b>.xlsx</b>
+        export onto the box (or click <b>Choose .xlsx files</b>). The rankings
+        rebuild straight away. Weeks sort themselves by the scan date inside
+        the file, so it does not matter what order you add them in.</p>
+        <p>A week runs from one weekly reset to the next. Any export scanned
+        inside that window replaces the one already there rather than adding a
+        second entry, so you can drop in a fresh scan every day and the week
+        simply stays up to date. The first scan taken after a reset starts the
+        next week, and the finished one stays put for the comparison.</p>
+
+        <h3>What does the score mean?</h3>
+        <p>A number from 0 to 100 measuring this week&rsquo;s effort against
+        everyone else in the kingdom. It is <b>not</b> a measure of how
+        big an account is &ndash; a well-run small account can outscore a whale
+        who did nothing.</p>
+        <p>It blends how a member ranks against everyone with how large their
+        numbers are in absolute terms, so one enormous KvK score cannot drown
+        out the other 480 people.</p>
+
+        <h3>What are the tiers?</h3>
+        <p>Cut by position, every week:</p>
+        <ul>
+          <li><span class="tier S">S</span> top 10% &ndash; carrying the kingdom</li>
+          <li><span class="tier A">A</span> next 15% &ndash; strong contributors</li>
+          <li><span class="tier B">B</span> and <span class="tier C">C</span> the middle 50%</li>
+          <li><span class="tier D">D</span> next 15% &ndash; needs a nudge</li>
+          <li><span class="tier F">F</span> bottom 10% &ndash; barely showed up</li>
+        </ul>
+
+        <h3>What do the tags mean?</h3>
+        <ul>
+          <li><span class="flag DEAD">DEAD</span> not logged in for 14+ days</li>
+          <li><span class="flag INACTIVE">INACTIVE</span> not logged in for 7+ days</li>
+          <li><span class="flag LOW">LOW</span> scored under 25 this week</li>
+          <li><span class="flag NO-SUPPORT">NO SUPPORT</span> zero tech donations, helps and building time</li>
+          <li><span class="flag NO-BASELINE">NO BASELINE</span> not in last week&rsquo;s export, so their weekly gain cannot be worked out yet</li>
+        </ul>
+
+        <h3>What is the difference between Kill and Kill +?</h3>
+        <p><b>Kill</b> is their total kill points, built up over the whole game.
+        <b>Kill +</b> is how much they added <b>this week</b> &ndash; and that is
+        the one the ranking uses. Someone who added 20M beats someone sitting on
+        a 100M total who added 10M. <b>Power</b> and <b>Power +</b> work the same
+        way.</p>
+        <p>Both read 0 in the very first week, because there is no earlier week
+        to measure the gain against. They start counting once a second week is
+        added.</p>
+
+        <h3>Can I change what counts?</h3>
+        <p>Yes &ndash; open <b>Scoring weights</b> above. Raise what matters to
+        us, set anything to 0 to drop it entirely. The percentages show each
+        stat&rsquo;s real share. Everything recalculates instantly, for everyone.
+        <b>Reset to defaults</b> undoes any mess.</p>
+
+        <h3>Are the spreadsheets kept?</h3>
+        <p>Yes. Every upload is stored exactly as it came in, so a week can
+        always be rebuilt. <b>Download backup</b> saves the lot &ndash; every
+        week, every setting and every original spreadsheet &ndash; as one file.
+        Worth doing occasionally.</p>
+
+        <h3>How do I get a list of top members?</h3>
+        <p>In <b>Member Rankings</b>, set the number next to <b>Export Top
+        Members</b> and click it. It downloads a plain <b>.txt</b> file
+        numbering the top members by score, ready to paste into Discord.</p>
+        <p>It always ranks the whole kingdom for the selected week &ndash;
+        any search or alliance/tier/status filter on the table is ignored,
+        so the list is never accidentally narrowed.</p>
+
+        <h3>Something looks wrong</h3>
+        <p>Click any member&rsquo;s row. It opens their full scorecard &ndash;
+        every stat, what it scored, and their week-by-week history &ndash; which
+        usually explains the number straight away.</p>
+      </div>
+    </div>
+  </details>
+
+  <details class="tool" id="dataTool">
+    <summary>Weekly spreadsheets</summary>
+    <div class="toolbody">
+      <div class="drop" id="drop">
+        <button class="primary" id="pickBtn">Choose .xlsx files</button>
+        <p>or drag them here &mdash; add one export per week, in any order</p>
+        <input type="file" id="picker" accept=".xlsx" multiple hidden>
+      </div>
+      <div class="weeklist" id="weekList"></div>
+      <div class="chipbar">
+        <button id="backupBtn">Download backup</button>
+        <button id="restoreBtn">Restore backup</button>
+        <input type="file" id="restorePicker" accept=".json,application/json" hidden>
+        <span class="meta" id="storeMode"></span>
+      </div>
+    </div>
+  </details>
+
+  <details class="tool" id="cfgTool">
+    <summary>Scoring weights</summary>
+    <div class="toolbody">
+      <p class="note" style="margin:0">Set anything to 0 to drop it from the score.
+        The percentages show each stat's real share once the numbers are normalised.
+        Changes save for everyone.</p>
+      <div class="wgrid" id="weights"></div>
+      <div class="wgrid" id="thresholds"></div>
+      <div class="chipbar">
+        <button id="resetCfg">Reset to defaults</button>
+      </div>
+    </div>
+  </details>
+
+  <div class="chipbar" id="weekTabs"></div>
+
+  <div id="app"></div>
+
+  <footer id="footer"></footer>
+</div>
+
+<script>
+
+async function readZip(buffer) {
+  const u8 = new Uint8Array(buffer);
+  const dv = new DataView(buffer);
+  let eocd = -1;
+  const floor = Math.max(0, u8.length - 66000);
+  for (let i = u8.length - 22; i >= floor; i--) {
+    if (dv.getUint32(i, true) === 0x06054b50) { eocd = i; break; }
+  }
+  if (eocd < 0) throw new Error("That file is not a valid .xlsx (no zip found).");
+  const count = dv.getUint16(eocd + 10, true);
+  let p = dv.getUint32(eocd + 16, true);
+  const entries = new Map();
+  const dec = new TextDecoder();
+  for (let n = 0; n < count; n++) {
+    if (dv.getUint32(p, true) !== 0x02014b50) break;
+    const method = dv.getUint16(p + 10, true);
+    const csize = dv.getUint32(p + 20, true);
+    const fnLen = dv.getUint16(p + 28, true);
+    const exLen = dv.getUint16(p + 30, true);
+    const cmLen = dv.getUint16(p + 32, true);
+    const lho = dv.getUint32(p + 42, true);
+    const name = dec.decode(u8.subarray(p + 46, p + 46 + fnLen));
+    entries.set(name, { method, csize, lho });
+    p += 46 + fnLen + exLen + cmLen;
+  }
+  return { u8, dv, entries };
+}
+
+async function readEntry(zip, name) {
+  const e = zip.entries.get(name);
+  if (!e) return null;
+  const fnLen = zip.dv.getUint16(e.lho + 26, true);
+  const exLen = zip.dv.getUint16(e.lho + 28, true);
+  const start = e.lho + 30 + fnLen + exLen;
+  const data = zip.u8.subarray(start, start + e.csize);
+  if (e.method === 0) return new TextDecoder().decode(data);
+  if (e.method !== 8) throw new Error("Unsupported compression in the .xlsx file.");
+  const stream = new Blob([data]).stream()
+    .pipeThrough(new DecompressionStream("deflate-raw"));
+  return await new Response(stream).text();
+}
+
+const xml = s => new DOMParser().parseFromString(s, "application/xml");
+
+function colIndex(ref) {
+  let n = 0;
+  for (let i = 0; i < ref.length; i++) {
+    const c = ref.charCodeAt(i);
+    if (c < 65 || c > 90) break;
+    n = n * 26 + (c - 64);
+  }
+  return n - 1;
+}
+
+function serialToDate(n) {
+  return new Date(Math.round((n - 25569) * 86400000));
+}
+
+async function parseWorkbook(buffer) {
+  const zip = await readZip(buffer);
+  const wbXml = await readEntry(zip, "xl/workbook.xml");
+  if (!wbXml) throw new Error("That .xlsx has no workbook inside it.");
+  const relsXml = await readEntry(zip, "xl/_rels/workbook.xml.rels");
+
+  const rels = new Map();
+  if (relsXml) {
+    for (const r of xml(relsXml).getElementsByTagName("Relationship")) {
+      rels.set(r.getAttribute("Id"), r.getAttribute("Target").replace(/^\/?xl\//, ""));
+    }
+  }
+
+  const shared = [];
+  const ssXml = await readEntry(zip, "xl/sharedStrings.xml");
+  if (ssXml) {
+    for (const si of xml(ssXml).getElementsByTagName("si")) {
+      let text = "";
+      for (const t of si.getElementsByTagName("t")) text += t.textContent;
+      shared.push(text);
+    }
+  }
+
+  const sheets = [];
+  const wb = xml(wbXml);
+  let auto = 0;
+  for (const sh of wb.getElementsByTagName("sheet")) {
+    auto++;
+    const rid = sh.getAttribute("r:id") ||
+      sh.getAttributeNS("http://schemas.openxmlformats.org/officeDocument/2006/relationships", "id");
+    const target = (rels.get(rid) || `worksheets/sheet${auto}.xml`).replace(/^\//, "");
+    const sheetXml = await readEntry(zip, "xl/" + target) ||
+                     await readEntry(zip, target);
+    if (!sheetXml) continue;
+    sheets.push({ name: sh.getAttribute("name"), rows: sheetRows(sheetXml, shared) });
+  }
+  return sheets;
+}
+
+function sheetRows(sheetXml, shared) {
+  const doc = xml(sheetXml);
+  const out = [];
+  for (const row of doc.getElementsByTagName("row")) {
+    const cells = [];
+    let max = -1;
+    for (const c of row.getElementsByTagName("c")) {
+      const ref = c.getAttribute("r") || "";
+      const idx = ref ? colIndex(ref) : max + 1;
+      const type = c.getAttribute("t");
+      let value = null;
+      if (type === "inlineStr") {
+        let t = "";
+        for (const n of c.getElementsByTagName("t")) t += n.textContent;
+        value = t;
+      } else {
+        const v = c.getElementsByTagName("v")[0];
+        if (v) {
+          if (type === "s") value = shared[parseInt(v.textContent, 10)] ?? "";
+          else if (type === "str" || type === "e") value = v.textContent;
+          else if (type === "b") value = v.textContent === "1";
+          else value = parseFloat(v.textContent);
+        }
+      }
+      cells[idx] = value;
+      if (idx > max) max = idx;
+    }
+    for (let i = 0; i <= max; i++) if (cells[i] === undefined) cells[i] = null;
+    out.push(cells);
+  }
+  return out;
+}
+
+const HEADER_ALIASES = {
+  governor_id: ["governor id", "governorid", "id", "player id", "lord id"],
+  alliance_tag: ["alliance tag"],
+  name: ["name", "governor name", "nickname", "player"],
+  rank: ["rank", "alliance rank"],
+  title: ["title"],
+  home_kingdom: ["home kingdom", "kingdom", "home"],
+  city_hall: ["city hall", "ch", "city hall level"],
+  power: ["power"],
+  kill_score: ["kill score", "killscore", "kp", "kill points"],
+  kills: ["kills", "total kills"],
+  tech_donations: ["tech donations", "technology donations", "tech donation"],
+  building_time_s: ["building time (s)", "building time", "build time (s)"],
+  times_helped: ["times helped", "helps", "helps given"],
+  resources_donated: ["resources donated", "resource donated", "resources",
+    "resources given"],
+  forts_destroyed: ["forts destroyed", "forts", "flags destroyed"],
+  armory_points: ["armory points", "armory", "armoury points"],
+  last_login: ["last login (utc)", "last login"],
+  days_inactive: ["days inactive", "inactive days"],
+  days_in_alliance: ["days in alliance", "days in ally"],
+};
+const LOOKUP = {};
+for (const [field, aliases] of Object.entries(HEADER_ALIASES))
+  for (const a of aliases) LOOKUP[a] = field;
+
+const SUMMARY_ALIASES = {
+  alliance_name: ["alliance", "alliance name"], tag: ["tag", "alliance tag"],
+  kingdom: ["kingdom"], leader: ["leader"], member_count: ["members", "member count"],
+};
+const SUMMARY_LOOKUP = {};
+for (const [f, aliases] of Object.entries(SUMMARY_ALIASES))
+  for (const a of aliases) SUMMARY_LOOKUP[a] = f;
+
+const ACTIVITY_FIELDS = ["kill_score", "kills", "tech_donations", "building_time_s",
+  "times_helped", "resources_donated", "forts_destroyed", "armory_points"];
+const NUMERIC = new Set([...ACTIVITY_FIELDS, "power", "city_hall",
+  "days_inactive", "days_in_alliance", "governor_id"]);
+
+const norm = v => v == null ? "" : String(v).normalize("NFKC").trim().toLowerCase().replace(/\s+/g, " ");
+
+function num(v) {
+  if (v == null || v === "") return 0;
+  if (typeof v === "number") return v;
+  if (typeof v === "boolean") return v ? 1 : 0;
+  let s = String(v).trim().replace(/,/g, "").replace(/\s/g, "");
+  let mult = 1;
+  const last = s.slice(-1).toLowerCase();
+  if ("kmb".includes(last) && s.length > 1) {
+    mult = { k: 1e3, m: 1e6, b: 1e9 }[last];
+    s = s.slice(0, -1);
+  }
+  const f = parseFloat(s);
+  return isNaN(f) ? 0 : f * mult;
+}
+
+function duplicateKeyColumns(row) {
+  let seen = 0;
+  for (const cell of row) {
+    const n = norm(cell);
+    if (n === "governor id" || n === "governorid") seen++;
+  }
+  return seen > 1;
+}
+
+function scanStamp(rows) {
+  const pattern = /(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2})(?::(\d{2}))?\s*UTC/;
+  for (const row of rows.slice(0, 12)) {
+    for (const cell of row) {
+      if (typeof cell !== "string") continue;
+      const hit = pattern.exec(cell);
+      if (hit) return new Date(Date.UTC(+hit[1], +hit[2] - 1, +hit[3],
+                                        +hit[4], +hit[5], +(hit[6] || 0)));
+    }
+  }
+  return null;
+}
+
+function findHeader(rows, required, lookup) {
+  for (let r = 0; r < Math.min(10, rows.length); r++) {
+    const map = {};
+    const seen = new Set();
+    rows[r].forEach((cell, i) => {
+      const field = lookup[norm(cell)];
+      if (field && !seen.has(field)) { map[i] = field; seen.add(field); }
+    });
+    if (required.every(f => seen.has(f))) return { row: r, map };
+  }
+  return null;
+}
+
+async function parseMembers(buffer) {
+  const sheets = await parseWorkbook(buffer);
+  const members = [];
+  const summaries = [];
+  let stamp = null;
+
+  for (const sheet of sheets) {
+    if (!sheet.rows.length) continue;
+    stamp = stamp || scanStamp(sheet.rows);
+
+    let hit = findHeader(sheet.rows, ["governor_id", "power"], LOOKUP);
+    if (!hit) {
+      const s = findHeader(sheet.rows, ["alliance_name", "tag"], SUMMARY_LOOKUP);
+      if (s) {
+        for (const row of sheet.rows.slice(s.row + 1)) {
+          const rec = {};
+          for (const [i, f] of Object.entries(s.map)) rec[f] = row[i];
+          if (!rec.tag) continue;
+          summaries.push({
+            tag: String(rec.tag).trim(),
+            alliance_name: String(rec.alliance_name ?? "").trim(),
+            kingdom: String(rec.kingdom ?? "").trim(),
+            leader: String(rec.leader ?? "").trim(),
+          });
+        }
+      }
+      continue;
+    }
+    if (duplicateKeyColumns(sheet.rows[hit.row])) continue;
+
+    for (const row of sheet.rows.slice(hit.row + 1)) {
+      const rec = {};
+      for (const [i, f] of Object.entries(hit.map)) rec[f] = row[i];
+      if (rec.governor_id == null || rec.governor_id === "") continue;
+      const m = {};
+      for (const field of Object.keys(HEADER_ALIASES)) {
+        const v = rec[field];
+        if (NUMERIC.has(field)) m[field] = num(v);
+        else if (field === "last_login") m[field] = typeof v === "number" ? v : null;
+        else m[field] = v == null ? null : String(v).trim();
+      }
+      m.alliance_tag = rec.alliance_tag == null || rec.alliance_tag === ""
+        ? String(sheet.name).trim() : String(rec.alliance_tag).trim();
+      m.governor_id = Math.round(m.governor_id);
+      m.name = m.name || ("Governor " + m.governor_id);
+      members.push(m);
+    }
+  }
+
+  if (!members.length)
+    throw new Error("No member rows found - is this the alliance export?");
+
+  const best = new Map();
+  for (const m of members) {
+    const prior = best.get(m.governor_id);
+    if (!prior || (m.last_login || 0) > (prior.last_login || 0)) best.set(m.governor_id, m);
+  }
+  const list = [...best.values()];
+  const logins = list.map(m => m.last_login).filter(Boolean);
+  const scanSerial = logins.length ? Math.max(...logins) : null;
+
+  return {
+    members: list,
+    summaries,
+    scanDate: scanSerial ? serialToDate(scanSerial).toISOString()
+      : stamp ? stamp.toISOString() : null,
+  };
+}
+
+const METRIC_LABELS = {
+  kill_score: "Kills +", kills: "Kills", tech_donations: "Tech Donations",
+  building_time_s: "Building Time", times_helped: "Helps",
+  resources_donated: "Resources Donated", forts_destroyed: "Forts Destroyed",
+  armory_points: "Armory Points", power_growth: "Power Growth",
+};
+const TIER_ORDER = ["S", "A", "B", "C", "D", "F"];
+
+function detectModes(weeks, cfg) {
+  const modes = {}, why = {};
+  const limit = cfg.scoring.cumulative_max_decrease ?? 0.15;
+  for (const name of ACTIVITY_FIELDS) {
+    const want = String(cfg.metric_mode?.[name] ?? "auto").toLowerCase();
+    if (want === "delta" || want === "raw") { modes[name] = want; why[name] = "set manually"; continue; }
+    let up = 0, down = 0;
+    for (let i = 1; i < weeks.length; i++) {
+      const prior = new Map(weeks[i - 1].members.map(m => [m.governor_id, m]));
+      for (const m of weeks[i].members) {
+        const p = prior.get(m.governor_id);
+        if (!p) continue;
+        const a = +p[name] || 0, b = +m[name] || 0;
+        if (b > a) up++; else if (b < a) down++;
+      }
+    }
+    const total = up + down;
+    if (total < 20) { modes[name] = "raw"; why[name] = "only one week of data so far"; }
+    else if (down / total <= limit) {
+      modes[name] = "delta"; why[name] = `accumulates (${Math.round(down / total * 100)}% fell)`;
+    } else {
+      modes[name] = "raw"; why[name] = `resets each week (${Math.round(down / total * 100)}% fell)`;
+    }
+  }
+  return { modes, why };
+}
+
+function percentileOf(sorted, q) {
+  if (!sorted.length) return 0;
+  if (sorted.length === 1) return sorted[0];
+  const pos = (sorted.length - 1) * (q / 100);
+  const lo = Math.floor(pos), hi = Math.ceil(pos);
+  if (lo === hi) return sorted[pos];
+  return sorted[lo] + (sorted[hi] - sorted[lo]) * (pos - lo);
+}
+
+function rankScores(values, curve, capPct) {
+  const n = values.length;
+  if (!n) return [];
+  if (n === 1) return [values[0] > 0 ? 100 : 0];
+  const order = values.map((_, i) => i).sort((a, b) => values[a] - values[b]);
+  const lowest = new Map();
+  order.forEach((idx, pos) => { if (!lowest.has(values[idx])) lowest.set(values[idx], pos); });
+  const pct = values.map(v => lowest.get(v) / (n - 1) * 100);
+  const ordered = order.map(i => values[i]);
+  let cap = percentileOf(ordered, capPct);
+  if (cap <= 0) cap = ordered[ordered.length - 1] || 1;
+  const normed = values.map(v => Math.min(v / cap, 1) * 100);
+  if (curve === "percentile") return pct;
+  if (curve === "normalized") return normed;
+  return pct.map((p, i) => (p + normed[i]) / 2);
+}
+
+function inactivityFactor(days, penalties) {
+  let factor = 1;
+  for (const [threshold, mult] of [...penalties].sort((a, b) => a[0] - b[0]))
+    if (days >= threshold) factor = mult;
+  return factor;
+}
+
+function tierFor(pct, cuts) {
+  for (const t of TIER_ORDER.slice(0, -1)) if (pct >= (cuts[t] ?? 0)) return t;
+  return "F";
+}
+
+function scoreWeek(week, previous, cfg, modes) {
+  const s = cfg.scoring;
+  const curve = s.curve ?? "hybrid";
+  const capPct = s.cap_percentile ?? 95;
+  const poolMode = s.pool ?? "global";
+  const newDelta = String(s.new_member_delta ?? "median").toLowerCase();
+  const penalties = cfg.inactivity.penalties;
+  const flagsCfg = cfg.flags;
+
+  const members = week.members.map(m => ({ ...m }));
+  const prevById = new Map((previous?.members ?? []).map(m => [m.governor_id, m]));
+  const hasPrevious = !!previous;
+
+  for (const m of members) {
+    const prior = prevById.get(m.governor_id);
+    m.has_baseline = !!prior;
+    m.power_growth = prior ? Math.max(0, m.power - prior.power) : 0;
+  }
+
+  const effModes = {};
+  for (const name of ACTIVITY_FIELDS)
+    effModes[name] = modes[name] === "delta" ? "delta" : "raw";
+
+  for (const m of members) {
+    const prior = prevById.get(m.governor_id);
+    for (const name of ACTIVITY_FIELDS) {
+      const raw = +m[name] || 0;
+      m["total_" + name] = raw;
+      if (effModes[name] !== "delta") m["eff_" + name] = raw;
+
+      else if (!hasPrevious) m["eff_" + name] = 0;
+      else if (prior) m["eff_" + name] = Math.max(0, raw - (+prior[name] || 0));
+      else m["eff_" + name] = null;
+    }
+    m.eff_power_growth = m.power_growth;
+  }
+  const usesDelta = Object.values(effModes).includes("delta");
+
+  for (const name of ACTIVITY_FIELDS) {
+    if (effModes[name] !== "delta") continue;
+    const known = members.map(m => m["eff_" + name]).filter(v => v !== null).sort((a, b) => a - b);
+    let fill = known.length ? known[Math.floor(known.length / 2)] : 0;
+    if (newDelta === "zero") fill = 0;
+    for (const m of members)
+      if (m["eff_" + name] === null)
+        m["eff_" + name] = newDelta === "raw" ? m["total_" + name] : fill;
+  }
+
+  const metrics = [];
+  for (const [name, w] of Object.entries(cfg.weights)) {
+    const weight = +w || 0;
+    if (weight <= 0) continue;
+    if (!ACTIVITY_FIELDS.includes(name) && name !== "power_growth") continue;
+    if (name === "power_growth" && !hasPrevious) continue;
+    if (members.every(m => (+m["eff_" + name] || 0) === 0)) continue;
+    metrics.push([name, weight]);
+  }
+  metrics.sort((a, b) => b[1] - a[1]);
+  const totalWeight = metrics.reduce((a, [, w]) => a + w, 0) || 1;
+
+  for (const m of members)
+    for (const [name] of metrics) m["adj_" + name] = +m["eff_" + name] || 0;
+
+  const pools = new Map();
+  if (poolMode === "alliance") {
+    for (const m of members) {
+      if (!pools.has(m.alliance_tag)) pools.set(m.alliance_tag, []);
+      pools.get(m.alliance_tag).push(m);
+    }
+  } else pools.set("__global__", members);
+
+  for (const pool of pools.values()) {
+    for (const [name] of metrics) {
+      const vals = pool.map(m => +m["adj_" + name] || 0);
+      const scores = rankScores(vals, curve, capPct);
+      pool.forEach((m, i) => { m["score_" + name] = scores[i]; });
+    }
+    for (const m of pool) {
+      const base = metrics.reduce((a, [n, w]) => a + m["score_" + n] * w, 0) / totalWeight;
+      m.base_score = base;
+      m.inactivity_factor = inactivityFactor(+m.days_inactive || 0, penalties);
+      m.score = Math.round(base * m.inactivity_factor * 100) / 100;
+    }
+    const sorted = pool.map(m => m.score).sort((a, b) => a - b);
+    for (const m of pool) {
+      const below = sorted.filter(v => v < m.score).length;
+      m.score_percentile = sorted.length > 1 ? below / (sorted.length - 1) * 100 : 100;
+      m.tier = tierFor(m.score_percentile, cfg.tiers);
+    }
+  }
+
+  const catMap = cfg.categories ?? {};
+  const catWeights = {};
+  for (const [name, w] of metrics) {
+    const c = catMap[name] ?? "Other";
+    catWeights[c] = (catWeights[c] ?? 0) + w;
+  }
+  for (const m of members) {
+    const totals = {};
+    for (const [name, w] of metrics) {
+      const c = catMap[name] ?? "Other";
+      totals[c] = (totals[c] ?? 0) + m["score_" + name] * w;
+    }
+    m.categories = {};
+    for (const [c, t] of Object.entries(totals))
+      m.categories[c] = Math.round(t / catWeights[c] * 10) / 10;
+  }
+
+  members.sort((a, b) => b.score - a.score);
+  members.forEach((m, i) => { m.rank_overall = i + 1; });
+  const byAlliance = new Map();
+  for (const m of members) {
+    if (!byAlliance.has(m.alliance_tag)) byAlliance.set(m.alliance_tag, []);
+    byAlliance.get(m.alliance_tag).push(m);
+  }
+  for (const g of byAlliance.values())
+    [...g].sort((a, b) => b.score - a.score).forEach((m, i) => { m.rank_in_alliance = i + 1; });
+
+  for (const m of members) {
+    const p = prevById.get(m.governor_id);
+    m.prev_rank = p?.rank_overall ?? null;
+    m.rank_change = p?.rank_overall ? p.rank_overall - m.rank_overall : null;
+    m.prev_score = p?.score ?? null;
+    m.score_change = p?.score != null ? Math.round((m.score - p.score) * 100) / 100 : null;
+  }
+
+  const inactiveDays = flagsCfg.inactive_days ?? 7;
+  const deadDays = flagsCfg.dead_days ?? 14;
+  const lowScore = flagsCfg.low_score ?? 25;
+  for (const m of members) {
+    const tags = [];
+    const d = +m.days_inactive || 0;
+    if (d >= deadDays) tags.push("DEAD");
+    else if (d >= inactiveDays) tags.push("INACTIVE");
+    if (m.score < lowScore && !tags.includes("DEAD")) tags.push("LOW");
+    if (["tech_donations", "times_helped", "building_time_s"]
+        .every(f => (+m["eff_" + f] || 0) === 0)) tags.push("NO SUPPORT");
+    if (usesDelta && hasPrevious && !m.has_baseline) tags.push("NO BASELINE");
+    m.flags = tags;
+  }
+
+  const meta = new Map((week.summaries ?? []).map(s => [s.tag, s]));
+  const prevAvg = new Map();
+  if (previous) {
+    const tmp = new Map();
+    for (const m of previous.members) {
+      if (!tmp.has(m.alliance_tag)) tmp.set(m.alliance_tag, []);
+      tmp.get(m.alliance_tag).push(m.score ?? 0);
+    }
+    for (const [t, v] of tmp) prevAvg.set(t, v.reduce((a, b) => a + b, 0) / v.length);
+  }
+
+  const alliances = [];
+  for (const [tag, g] of byAlliance) {
+    const avg = g.reduce((a, m) => a + m.score, 0) / g.length;
+    const prior = prevAvg.get(tag);
+    const totals = {};
+    for (const [name] of metrics)
+      totals[name] = g.reduce((a, m) => a + (+m["eff_" + name] || 0), 0);
+    alliances.push({
+      tag, name: meta.get(tag)?.alliance_name || tag,
+      members: g.length,
+      avg_score: Math.round(avg * 100) / 100,
+      median_score: Math.round([...g].sort((a, b) => a.score - b.score)[Math.floor(g.length / 2)].score * 100) / 100,
+      avg_change: prior != null ? Math.round((avg - prior) * 100) / 100 : null,
+      total_power: g.reduce((a, m) => a + (+m.power || 0), 0),
+      inactive: g.filter(m => m.flags.includes("INACTIVE") || m.flags.includes("DEAD")).length,
+      top_tier: g.filter(m => m.tier === "S" || m.tier === "A").length,
+      totals,
+    });
+  }
+  alliances.sort((a, b) => b.avg_score - a.avg_score);
+  alliances.forEach((a, i) => { a.rank = i + 1; });
+
+  return {
+    label: week.label, scanDate: week.scanDate, members, alliances,
+    metrics: metrics.map(([n]) => n), metricModes: effModes, usesDelta,
+    hasPrevious, previousLabel: previous?.label ?? null,
+    tierCounts: Object.fromEntries(TIER_ORDER.map(t =>
+      [t, members.filter(m => m.tier === t).length])),
+  };
+}
+
+function scoreAll(weeks, cfg) {
+  const { modes, why } = detectModes(weeks, cfg);
+  const results = [];
+  let prev = null;
+  for (const w of weeks) {
+    const r = scoreWeek(w, prev, cfg, modes);
+    results.push(r);
+    prev = { label: w.label, members: r.members };
+  }
+  return { results, modes, why };
+}
+
+function departures(current, previous) {
+  if (!previous) return [];
+  const now = new Set(current.members.map(m => m.governor_id));
+  return previous.members.filter(m => !now.has(m.governor_id))
+    .map(m => ({
+      governor_id: m.governor_id, name: m.name, alliance_tag: m.alliance_tag,
+      power: m.power, last_score: m.score ?? null, last_tier: m.tier ?? null,
+    }))
+    .sort((a, b) => b.power - a.power);
+}
+
+
+
+const DEFAULT_CONFIG = {
+  "scoring": {
+    "curve": "hybrid",
+    "cap_percentile": 95,
+    "pool": "global"
+  },
+  "metric_mode": {
+    "kill_score": "delta",
+    "times_helped": "delta",
+    "resources_donated": "delta",
+    "tech_donations": "raw",
+    "building_time_s": "raw",
+    "forts_destroyed": "raw",
+    "armory_points": "raw"
+  },
+  "weights": {
+    "kill_score": 35,
+    "times_helped": 25,
+    "resources_donated": 20,
+    "power_growth": 20,
+    "tech_donations": 0,
+    "armory_points": 0,
+    "forts_destroyed": 0,
+    "building_time_s": 0
+  },
+  "categories": {
+    "kill_score": "Combat",
+    "forts_destroyed": "Combat",
+    "tech_donations": "Support",
+    "times_helped": "Support",
+    "building_time_s": "Support",
+    "resources_donated": "Support",
+    "armory_points": "Armory",
+    "power_growth": "Growth"
+  },
+  "inactivity": {
+    "penalties": [
+      [
+        0,
+        1.0
+      ],
+      [
+        2,
+        0.95
+      ],
+      [
+        4,
+        0.85
+      ],
+      [
+        7,
+        0.6
+      ],
+      [
+        14,
+        0.35
+      ],
+      [
+        30,
+        0.15
+      ]
+    ]
+  },
+  "tiers": {
+    "S": 90,
+    "A": 75,
+    "B": 50,
+    "C": 25,
+    "D": 10
+  },
+  "flags": {
+    "inactive_days": 7,
+    "dead_days": 14,
+    "low_score": 25
+  }
+};
+
+const SEED = [];
+
+let STATE = { version: 1, config: structuredClone(DEFAULT_CONFIG), weeks: [] };
+let VIEW = { weekIndex: -1, alliance: "", tier: "", flag: "", q: "",
+             sortKey: "r", sortAsc: true, topX: 25,
+             mode: (() => {
+               try { return localStorage.getItem("rok-view-mode") === "day" ? "day" : "week"; }
+               catch (e) { return "week"; }
+             })() };
+let SCORED = [];
+let READONLY = false;
+let api = null;
+let saveTimer = null;
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c =>
+  ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const cls = s => String(s).replace(/[^A-Za-z0-9]+/g, "-");
+const fmt = n => {
+  n = Number(n) || 0;
+  if (Math.abs(n) >= 1e9) return (n / 1e9).toFixed(2) + "B";
+  if (Math.abs(n) >= 1e6) return (n / 1e6).toFixed(2) + "M";
+  if (Math.abs(n) >= 1e3) return (n / 1e3).toFixed(1) + "K";
+  return String(Math.round(n));
+};
+const delta = v => v == null ? '<span class="flat">&ndash;</span>'
+  : v > 0 ? '<span class="up">+' + (typeof v === "number" && v % 1 ? v.toFixed(1) : v) + "</span>"
+  : v < 0 ? '<span class="down">' + (typeof v === "number" && v % 1 ? v.toFixed(1) : v) + "</span>"
+  : '<span class="flat">0</span>';
+
+function setStatus(text, kind) {
+  const el = $("saveStatus");
+  if (el) { el.textContent = text; el.className = "status " + (kind || ""); }
+}
+
+const PACK_FIELDS = ["governor_id", "name", "alliance_tag", "rank", "title",
+  "home_kingdom", "city_hall", "power", "kill_score", "kills", "tech_donations",
+  "building_time_s", "times_helped", "resources_donated", "forts_destroyed",
+  "armory_points", "last_login", "days_inactive", "days_in_alliance"];
+
+const packWeek = (w, byRef) => ({
+  id: w.id, label: w.label, scanDate: w.scanDate, summaries: w.summaries,
+
+  file: !w.file ? null
+    : byRef && w.file.sha ? { name: w.file.name, sha: w.file.sha }
+    : w.file,
+  cols: PACK_FIELDS, rows: w.members.map(m => PACK_FIELDS.map(f => m[f] ?? null)),
+});
+const unpackWeek = w => {
+  if (!w.rows) return w;
+  const cols = w.cols || PACK_FIELDS;
+  return {
+    id: w.id, label: w.label, scanDate: w.scanDate, summaries: w.summaries || [],
+    file: w.file || null,
+    members: w.rows.map(r => Object.fromEntries(cols.map((c, i) => [c, r[i]]))),
+  };
+};
+
+const Store = {
+  mode: "none", api: null, preloaded: null, rev: "0", auth: "off",
+
+  async detect() {
+    if (typeof claude !== "undefined" && claude.use) {
+      try { this.api = await claude.use("artifact"); } catch (e) { this.api = null; }
+      if (this.api) { this.mode = "artifact"; return; }
+    }
+    try {
+      const res = await fetch("api/state", { cache: "no-store" });
+
+      if (res.ok || res.status === 401) {
+        this.mode = "server";
+        this.rev = res.headers.get("X-WarRoom-Rev") || "0";
+        this.auth = res.headers.get("X-WarRoom-Auth") || (res.ok ? "off" : "required");
+        this.preloaded = res.ok ? await res.json() : null;
+        return;
+      }
+    } catch (e) {  }
+    this.mode = typeof localStorage !== "undefined" ? "local" : "none";
+  },
+
+  async read() {
+    if (this.mode === "server") return this.preloaded;
+    if (this.mode === "local") {
+      try { return JSON.parse(localStorage.getItem("rok-warroom") || "null"); }
+      catch (e) { return null; }
+    }
+    if (this.mode === "artifact") {
+      try {
+        const res = await fetch("data/state.json", { cache: "no-store" });
+        if (res.ok) return await res.json();
+      } catch (e) {  }
+    }
+    return null;
+  },
+
+  async write(payload) {
+    if (this.mode === "artifact") return this.api.publish({ "data/state.json": payload });
+    if (this.mode === "server") {
+
+      const res = await fetch("api/state", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json", "If-Match": this.rev },
+        body: payload });
+      if (res.status === 409) throw { code: "conflict" };
+      if (res.status === 401) throw { code: "needs_login" };
+      if (res.status === 413) throw { code: "too_large" };
+      if (res.status === 429) throw { code: "rate_limited" };
+      if (!res.ok) throw { code: "upstream_error", message: "the server returned " + res.status };
+      const out = await res.json().catch(() => null);
+      if (out) {
+        this.rev = String(out.rev);
+
+        for (const id of Object.keys(out.files || {})) {
+          const week = STATE.weeks.find(w => w.id === id);
+          if (week && week.file) week.file.sha = out.files[id];
+        }
+      }
+      return;
+    }
+    if (this.mode === "local") { localStorage.setItem("rok-warroom", payload); return; }
+    throw { code: "unavailable", message: "there is nowhere to save from this page" };
+  },
+};
+
+function mergeConfig(saved) {
+  const cfg = structuredClone(DEFAULT_CONFIG);
+  if (!saved) return cfg;
+  for (const k of Object.keys(cfg.weights))
+    if (Number.isFinite(+saved.weights?.[k])) cfg.weights[k] = +saved.weights[k];
+  for (const k of Object.keys(cfg.flags))
+    if (Number.isFinite(+saved.flags?.[k])) cfg.flags[k] = +saved.flags[k];
+  return cfg;
+}
+
+async function load() {
+  const raw = await Store.read();
+  if (raw && raw.weeks) {
+    STATE = {
+      version: raw.version || 1,
+      config: mergeConfig(raw.config),
+      weeks: raw.weeks.map(unpackWeek),
+    };
+  }
+  if (!STATE.weeks.length && SEED && SEED.length) STATE.weeks = SEED.map(unpackWeek);
+}
+
+function queueSave() {
+  if (READONLY || Store.mode === "none") return;
+  clearTimeout(saveTimer);
+  setStatus("unsaved", "busy");
+  saveTimer = setTimeout(save, 1200);
+}
+
+async function save() {
+  if (READONLY || Store.mode === "none") return;
+  clearTimeout(saveTimer);
+  setStatus("saving…", "busy");
+  const payload = JSON.stringify({
+    version: 1, config: STATE.config,
+    weeks: STATE.weeks.map(w => packWeek(w, Store.mode === "server")),
+  });
+  try {
+    await Store.write(payload);
+    setStatus(Store.mode === "local" ? "saved (this browser)" : "saved", "ok");
+  } catch (err) {
+    const code = err && err.code;
+    if (["not_writer", "not_granted", "not_declared", "capability_disabled",
+         "capability_removed", "consent_required"].includes(code)) {
+      goReadOnly("You have view-only access, so changes will not be saved for others.", true);
+    } else if (code === "conflict") {
+      setStatus("someone else saved first – reloading", "busy");
+      notice("Someone else saved a change while this page was open. " +
+             "Reloading, so their work is not overwritten.", false);
+      setTimeout(() => location.reload(), 1800);
+    } else if (code === "needs_login") {
+      setStatus("not logged in", "err");
+      loginPrompt("Your session has ended. Log in again to keep saving.");
+    } else if (code === "too_large") {
+      setStatus("too much data to save", "err");
+      notice("The saved data is too large. Remove an older week and try again.", true);
+    } else if (code === "rate_limited") {
+      setStatus("saving too often – retrying", "busy");
+      clearTimeout(saveTimer);
+      saveTimer = setTimeout(save, 8000);
+    } else {
+      setStatus("save failed", "err");
+      notice("Could not save: " + (err && err.message ? err.message : code || "unknown error"), true);
+    }
+  }
+}
+
+function goReadOnly(message, hide) {
+  READONLY = true;
+  setStatus(hide ? "view only" : "not saving", "");
+  if (hide) {
+    $("dataTool").open = false;
+    $("cfgTool").open = false;
+    $("dataTool").style.display = "none";
+    $("cfgTool").style.display = "none";
+  }
+  if (message) notice(message, false);
+}
+
+function notice(text, bad) {
+  $("notice").innerHTML =
+    '<div class="banner' + (bad ? " bad" : "") + '">' + esc(text) + "</div>";
+}
+
+function loginPrompt(message) {
+  $("notice").innerHTML = '<div class="banner"><b>' + esc(message) + "</b><br>" +
+    '<input id="pwInput" type="password" placeholder="Password" ' +
+    'autocomplete="current-password" style="max-width:220px"> ' +
+    '<button id="pwBtn">Log in</button> <span id="pwMsg"></span></div>';
+  const go = async () => {
+    $("pwMsg").textContent = "checking...";
+    try {
+      const res = await fetch("api/login", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password: $("pwInput").value }),
+      });
+      if (res.ok) { location.reload(); return; }
+      const out = await res.json().catch(() => ({}));
+      $("pwMsg").textContent = out.error || "that did not work";
+    } catch (e) {
+      $("pwMsg").textContent = "could not reach the server";
+    }
+  };
+  $("pwBtn").onclick = go;
+  $("pwInput").onkeydown = e => { if (e.key === "Enter") go(); };
+  $("pwInput").focus();
+}
+
+const WEEK_RESET_DAY = 1;
+
+function weekKey(iso) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(iso || ""));
+  if (!m) return null;
+  const day = Date.UTC(+m[1], +m[2] - 1, +m[3]);
+  const back = (new Date(day).getUTCDay() - WEEK_RESET_DAY + 7) % 7;
+  return new Date(day - back * 86400000).toISOString().slice(0, 10);
+}
+
+const MONTHS = ["January", "February", "March", "April", "May", "June", "July",
+  "August", "September", "October", "November", "December"];
+
+function weekLabel(iso) {
+  const key = weekKey(iso);
+  if (!key) return null;
+  const first = new Date(key + "T00:00:00Z");
+  const last = new Date(first.getTime() + 6 * 86400000);
+  const fm = first.getUTCMonth(), lm = last.getUTCMonth();
+  return fm === lm
+    ? first.getUTCDate() + "-" + last.getUTCDate() + " " + MONTHS[fm]
+    : first.getUTCDate() + " " + MONTHS[fm] + " - " + last.getUTCDate() + " " + MONTHS[lm];
+}
+
+function sortWeeks() {
+  STATE.weeks.sort((a, b) =>
+    String(a.scanDate || a.label).localeCompare(String(b.scanDate || b.label)));
+}
+
+function dayLabel(iso, ambiguous) {
+  const d = new Date(iso);
+  if (isNaN(d)) return String(iso);
+  const stamp = d.getUTCDate() + " " + MONTHS[d.getUTCMonth()].slice(0, 3);
+  if (!ambiguous) return stamp;
+  const hh = String(d.getUTCHours()).padStart(2, "0");
+  return stamp + " " + hh + ":" + String(d.getUTCMinutes()).padStart(2, "0");
+}
+
+function visibleWeeks() {
+  sortWeeks();
+  if (VIEW.mode === "day") {
+    const seen = {};
+    STATE.weeks.forEach(w => {
+      const d = String(w.scanDate || "").slice(0, 10);
+      seen[d] = (seen[d] || 0) + 1;
+    });
+    return STATE.weeks.map(w => Object.assign({}, w, {
+      label: dayLabel(w.scanDate, seen[String(w.scanDate || "").slice(0, 10)] > 1),
+    }));
+  }
+  const latest = {};
+  STATE.weeks.forEach(w => {
+    const k = weekKey(w.scanDate) || w.id;
+    if (!latest[k] || String(w.scanDate) > String(latest[k].scanDate)) latest[k] = w;
+  });
+  return Object.keys(latest).sort().map(k => latest[k]);
+}
+
+function setMode(mode) {
+  VIEW.mode = mode === "day" ? "day" : "week";
+  try { localStorage.setItem("rok-view-mode", VIEW.mode); } catch (e) { }
+  recompute();
+  VIEW.weekIndex = SCORED.length - 1;
+  render();
+}
+
+function recompute() {
+  sortWeeks();
+  const shown = visibleWeeks();
+  SCORED = shown.length ? scoreAll(shown, STATE.config).results : [];
+  if (VIEW.weekIndex < 0 || VIEW.weekIndex >= SCORED.length)
+    VIEW.weekIndex = SCORED.length - 1;
+}
+
+function bytesToB64(buf) {
+  const u8 = new Uint8Array(buf);
+  let s = "";
+  for (let i = 0; i < u8.length; i += 0x8000)
+    s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000));
+  return btoa(s);
+}
+function b64ToBytes(b64) {
+  const bin = atob(b64);
+  const u8 = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
+  return u8;
+}
+
+async function addFiles(files) {
+  const list = [...files].filter(f => f.name.toLowerCase().endsWith(".xlsx"));
+  if (!list.length) return notice("Those are not .xlsx files.", true);
+  setStatus("reading…", "busy");
+  let added = 0, replaced = 0, failed = [];
+  for (const file of list) {
+    try {
+      const buf = await file.arrayBuffer();
+      const parsed = await parseMembers(buf);
+      const label = file.name.replace(/\.xlsx$/i, "").slice(0, 60);
+      const scan = parsed.scanDate;
+
+      const same = STATE.weeks.filter(w => w.scanDate === scan);
+      const snapshot = {
+        id: same.length ? same[0].id
+          : (crypto.randomUUID ? crypto.randomUUID() : String(Date.now() + Math.random())),
+        label: weekLabel(scan) || label,
+        scanDate: scan, members: parsed.members, summaries: parsed.summaries,
+        file: { name: file.name, b64: bytesToB64(buf) },
+      };
+      STATE.weeks = STATE.weeks.filter(w => !same.includes(w));
+      STATE.weeks.push(snapshot);
+      replaced += same.length;
+      added++;
+    } catch (e) {
+      failed.push(file.name + " - " + e.message);
+    }
+  }
+  recompute();
+  VIEW.weekIndex = SCORED.length - 1;
+  render();
+  if (failed.length) notice("Could not read: " + failed.join("; "), true);
+  else if (added) notice(
+    replaced ? "That scan was already here - it has been refreshed."
+      : added + (added === 1 ? " scan added." : " scans added."), false);
+  queueSave();
+}
+
+function removeWeek(id) {
+  const w = STATE.weeks.find(x => x.id === id);
+  if (!w || !confirm('Remove "' + w.label + '" and its rankings?')) return;
+  STATE.weeks = STATE.weeks.filter(x => x.id !== id);
+  recompute();
+  render();
+  queueSave();
+}
+
+function renderWeekList() {
+  const el = $("weekList");
+  if (!STATE.weeks.length) {
+    el.innerHTML = '<p class="note" style="margin:0">No weeks yet. Add an export above.</p>';
+    return;
+  }
+  el.innerHTML = visibleWeeks().map(w => `
+    <div class="weekrow" data-id="${esc(w.id)}">
+      <input value="${esc(w.label)}" aria-label="Week name" data-id="${esc(w.id)}">
+      <span class="meta">${w.members.length} members${
+        w.scanDate ? " &middot; scan " + esc(w.scanDate.slice(0, 10)) : ""}${
+        w.file ? " &middot; sheet saved" : ""}</span>
+      ${w.file && Store.mode !== "artifact"
+        ? `<button data-xlsx="${esc(w.id)}">.xlsx</button>` : ""}
+
+      <button class="danger" data-del="${esc(w.id)}">Remove</button>
+
+    </div>`).join("");
+
+  el.querySelectorAll("input").forEach(inp => {
+    inp.onchange = () => {
+      const w = STATE.weeks.find(x => x.id === inp.dataset.id);
+      if (w) { w.label = inp.value.trim() || w.label; recompute(); render(); queueSave(); }
+    };
+  });
+  el.querySelectorAll("button[data-del]").forEach(b => {
+    b.onclick = () => removeWeek(b.dataset.del);
+  });
+  el.querySelectorAll("button[data-xlsx]").forEach(b => {
+    b.onclick = () => {
+      const w = STATE.weeks.find(x => x.id === b.dataset.xlsx);
+      if (w && w.file) downloadBytes(b64ToBytes(w.file.b64), w.file.name,
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+    };
+  });
+}
+
+function renderConfig() {
+  const w = STATE.config.weights;
+  const total = Object.values(w).reduce((a, b) => a + (+b || 0), 0) || 1;
+  $("weights").innerHTML = Object.keys(w).map(k => `
+    <div class="wfield">
+      <label for="w_${k}">${esc(METRIC_LABELS[k] || k)}</label>
+      <input id="w_${k}" type="number" min="0" step="1" value="${+w[k] || 0}" data-w="${k}">
+      <span class="pct">${(+w[k] > 0 ? (w[k] / total * 100).toFixed(0) : "0")}%</span>
+    </div>`).join("");
+  $("weights").querySelectorAll("input").forEach(inp => {
+    inp.onchange = () => {
+      STATE.config.weights[inp.dataset.w] = Math.max(0, +inp.value || 0);
+      recompute(); render(); queueSave();
+    };
+  });
+
+  const t = [
+    ["inactive_days", "Inactive after (days)", STATE.config.flags.inactive_days],
+    ["dead_days", "Kick candidate (days)", STATE.config.flags.dead_days],
+    ["low_score", "Low activity below", STATE.config.flags.low_score],
+  ];
+  $("thresholds").innerHTML = t.map(([k, label, v]) => `
+    <div class="wfield">
+      <label for="t_${k}">${esc(label)}</label>
+      <input id="t_${k}" type="number" min="0" step="1" value="${v}" data-t="${k}">
+    </div>`).join("");
+  $("thresholds").querySelectorAll("input").forEach(inp => {
+    inp.onchange = () => {
+      STATE.config.flags[inp.dataset.t] = Math.max(0, +inp.value || 0);
+      recompute(); render(); queueSave();
+    };
+  });
+}
+
+function renderTabs() {
+  const toggle = STATE.weeks.length
+    ? `<span class="modes" role="group" aria-label="Compare by">` +
+      ["week", "day"].map(m =>
+        `<span class="chip mode ${VIEW.mode === m ? "on" : ""}" tabindex="0"
+          data-mode="${m}">${m === "week" ? "Week" : "Day"}</span>`).join("") +
+      `</span>` : "";
+  $("weekTabs").innerHTML = toggle +
+    SCORED.map((r, i) => `<span class="chip ${i === VIEW.weekIndex ? "on" : ""}"
+      tabindex="0" data-week="${i}">${esc(r.label)}</span>`).join(" ") +
+    '<span class="status" id="saveStatus">' + (READONLY ? "view only" : "ready") + "</span>";
+  $("weekTabs").querySelectorAll("[data-week]").forEach(c => {
+    const go = () => { VIEW.weekIndex = +c.dataset.week; render(); };
+    c.onclick = go;
+    c.onkeydown = e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); go(); } };
+  });
+  $("weekTabs").querySelectorAll("[data-mode]").forEach(c => {
+    const go = () => setMode(c.dataset.mode);
+    c.onclick = go;
+    c.onkeydown = e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); go(); } };
+  });
+}
+
+const METRIC_ORDER = ["kill_score", "tech_donations", "times_helped",
+  "armory_points", "forts_destroyed", "building_time_s", "resources_donated",
+  "kills"];
+const shownMetrics = r => METRIC_ORDER.filter(k =>
+  (+STATE.config.weights[k] || 0) > 0 || r.metrics.includes(k));
+
+const sevOf = m => m.flags.includes("DEAD") ? "sev-crit"
+  : m.flags.includes("INACTIVE") ? "sev-warn"
+  : m.flags.includes("LOW") ? "sev-low" : "";
+
+function spreadColumns() {
+  const tbl = document.getElementById("memberTable");
+  if (!tbl) return;
+  const box = tbl.closest(".scroll");
+  if (!box) return;
+  tbl.style.setProperty("--spread", "0px");
+  const cols = tbl.querySelectorAll("thead th").length;
+  if (!cols) return;
+  const spare = box.clientWidth - tbl.getBoundingClientRect().width;
+  if (spare > 1) tbl.style.setProperty("--spread", (spare / (cols * 2)) + "px");
+}
+
+function render() {
+  renderWeekList();
+  renderConfig();
+  renderTabs();
+
+  const r = SCORED[VIEW.weekIndex];
+  const app = $("app");
+  if (!r) {
+    app.innerHTML = '<div class="panel"><div class="empty">' +
+      "<h2>No data yet</h2><p>Add a weekly .xlsx export above to build the rankings.</p>" +
+      "</div></div>";
+    $("subtitle").textContent = "no weeks loaded";
+    $("footer").textContent = "";
+    return;
+  }
+
+  const prev = VIEW.weekIndex > 0 ? SCORED[VIEW.weekIndex - 1] : null;
+  const left = departures(r, prev);
+  const isDelta = k => r.metricModes[k] === "delta";
+  const ms = r.members;
+
+  $("subtitle").innerHTML = esc(r.label) +
+    (r.scanDate ? " &middot; scan " + esc(r.scanDate.slice(0, 10)) : "") + "<br>" +
+    ms.length + " members &middot; " + r.alliances.length + " alliances" +
+    (r.hasPrevious ? " &middot; vs " + esc(r.previousLabel) : "");
+
+  const avg = ms.reduce((a, m) => a + m.score, 0) / ms.length;
+  const med = ms.map(m => m.score).sort((a, b) => a - b)[Math.floor(ms.length / 2)];
+  const inactive = ms.filter(m => m.flags.includes("INACTIVE") || m.flags.includes("DEAD")).length;
+  const dead = ms.filter(m => m.flags.includes("DEAD")).length;
+  const top = ms.find(m => m.rank_overall === 1) || ms[0];
+  const tc = r.tierCounts;
+
+  const cards = [
+    ["Members ranked", ms.length, r.alliances.map(a => a.tag + " " + a.members).join("  ")],
+    ["Average score", avg.toFixed(1), "median " + med.toFixed(1)],
+    ["Top performer", esc(top.name), esc(top.alliance_tag) + " &middot; " + top.score.toFixed(1) + " pts"],
+    ["S / A tier", (tc.S || 0) + " / " + (tc.A || 0), "carrying the kingdom"],
+    ["Needs action", inactive, dead + " over " + STATE.config.flags.dead_days + " days idle"],
+  ];
+
+  const metricHead = r.metrics.map(k =>
+    `<th class="num">${esc(METRIC_LABELS[k] || k)}</th>`).join("");
+
+  const allianceRows = r.alliances.map(a => `<tr>
+    <td class="num">${a.rank}</td><td><b>${esc(a.tag)}</b></td><td>${esc(a.name)}</td>
+    <td class="num">${a.members}</td><td class="num"><b>${a.avg_score.toFixed(1)}</b></td>
+    <td class="num">${a.median_score.toFixed(1)}</td>
+    <td class="num">${a.avg_change == null ? '<span class="flat">&ndash;</span>' : delta(a.avg_change)}</td>
+    <td class="num">${a.top_tier}</td><td class="num">${a.inactive}</td>
+    <td class="num">${fmt(a.total_power)}</td>
+    ${r.metrics.map(k => `<td class="num">${fmt(a.totals[k])}</td>`).join("")}</tr>`).join("");
+
+  const SHORT = {
+    kill_score: "Kill", kills: "Kills", tech_donations: "Tech",
+    times_helped: "Helps", armory_points: "Armory", forts_destroyed: "Forts",
+    building_time_s: "Build", resources_donated: "Res", power_growth: "Power +",
+  };
+  const COLS = [
+    { k: "rank_overall", t: "#", n: 1, f: m => m.rank_overall },
+    { k: "name", t: "Governor", n: 0,
+      f: m => `<span class="nm">${esc(m.name)}</span>` +
+
+        (m.title ? `<br><span class="sub2">${esc(m.title)}</span>` : "") },
+    { k: "alliance_tag", t: "Ally", n: 0, f: m => esc(m.alliance_tag) },
+    { k: "rank", t: "Rk", n: 0, f: m => esc(m.rank || "") },
+    { k: "score", t: "Score", n: 1, f: m =>
+        `<div class="bar"><i style="width:${m.score}%"></i><b>${m.score.toFixed(1)}</b></div>` },
+    { k: "tier", t: "Tier", n: 0, f: m => `<span class="tier ${m.tier}">${m.tier}</span>` },
+
+    ...(r.hasPrevious ? [
+      { k: "score_change", t: "+/-", n: 1, f: m => delta(m.score_change) },
+      { k: "rank_change", t: "Move", n: 1, f: m => delta(m.rank_change) },
+    ] : []),
+    { k: "rank_in_alliance", t: "In ally", n: 1, f: m => m.rank_in_alliance },
+    { k: "power", t: "Power", n: 1, f: m => fmt(m.power) },
+    { k: "power_growth", t: "Power +", n: 1, f: m => fmt(m.power_growth || 0) },
+    { k: "city_hall", t: "CH", n: 1, f: m => m.city_hall || "" },
+    { k: "days_inactive", t: "Status", n: 0, cls: "status", f: m =>
+        m.flags.map(x => `<span class="flag ${cls(x)}">${esc(x)}</span>`).join("") +
+        (m.days_inactive > 0
+          ? `<span class="sub2">${m.days_inactive}d idle</span>` : "") },
+  ].concat(shownMetrics(r).flatMap(k => {
+
+    const total = {
+      k: isDelta(k) ? "total_" + k : "eff_" + k,
+      t: SHORT[k] || METRIC_LABELS[k] || k, n: 1,
+      f: m => fmt(isDelta(k) ? m["total_" + k] : m["eff_" + k]),
+    };
+    if (k !== "kill_score") return [total];
+    return [total, {
+      k: "kill_growth", t: "Kill +", n: 1,
+      f: m => fmt(r.metricModes.kill_score === "delta" ? (m.eff_kill_score || 0) : 0),
+    }];
+  }));
+
+  const rows = ms.filter(m =>
+    (!VIEW.alliance || m.alliance_tag === VIEW.alliance) &&
+    (!VIEW.tier || m.tier === VIEW.tier) &&
+    (!VIEW.flag || m.flags.includes(VIEW.flag)) &&
+    (!VIEW.q || m.name.toLowerCase().includes(VIEW.q) || String(m.governor_id).includes(VIEW.q))
+  ).sort((a, b) => {
+    const x = a[VIEW.sortKey], y = b[VIEW.sortKey];
+    const c = (typeof x === "string" || typeof y === "string")
+      ? String(x ?? "").localeCompare(String(y ?? "")) : (Number(x ?? 0) - Number(y ?? 0));
+    return VIEW.sortAsc ? c : -c;
+  });
+
+  const priority = { DEAD: 0, INACTIVE: 1, "NO SUPPORT": 2, LOW: 3 };
+  const actionRows = ms.filter(m => m.flags.some(f => f in priority))
+    .sort((a, b) => Math.min(...a.flags.map(f => priority[f] ?? 9)) -
+                    Math.min(...b.flags.map(f => priority[f] ?? 9)) || a.score - b.score)
+    .map(m => `<tr class="expander ${sevOf(m)}" data-id="${m.governor_id}">
+      <td>${esc(m.alliance_tag)}</td><td>${esc(m.name)}</td>
+      <td class="num">${m.score.toFixed(1)}</td><td><span class="tier ${m.tier}">${m.tier}</span></td>
+      <td class="num">${m.days_inactive}</td><td class="num">${fmt(m.power)}</td>
+      <td>${m.flags.map(x => `<span class="flag ${cls(x)}">${esc(x)}</span>`).join("")}</td></tr>`).join("");
+
+  const depRows = left.map(d => `<tr><td>${esc(d.alliance_tag)}</td><td>${esc(d.name)}</td>
+    <td class="num">${fmt(d.power)}</td>
+    <td class="num">${d.last_score == null ? "&ndash;" : d.last_score.toFixed(1)}</td>
+    <td>${d.last_tier ? `<span class="tier ${d.last_tier}">${d.last_tier}</span>` : ""}</td></tr>`).join("");
+
+  const wTotal = r.metrics.reduce((a, k) => a + (+STATE.config.weights[k] || 0), 0) || 1;
+
+  app.innerHTML = `
+    ${!r.hasPrevious ? '<div class="banner"><b>Only one week loaded.</b> Add an earlier ' +
+      'or later export and week-over-week gains, rank movement and departures switch on ' +
+      "automatically.</div>" : ""}
+
+    <section><h2>This Week</h2><div class="cards">${cards.map(c =>
+      `<div class="card"><span class="k">${c[0]}</span><span class="v">${c[1]}</span>
+       <span class="n">${c[2]}</span></div>`).join("")}</div></section>
+
+    <section><h2>Alliance Standings</h2><div class="panel"><div class="scroll"><table>
+      <thead><tr><th>#</th><th>Tag</th><th>Alliance</th><th class="num">Members</th>
+      <th class="num">Avg</th><th class="num">Median</th><th class="num">vs last</th>
+      <th class="num">S+A</th><th class="num">Idle</th><th class="num">Power</th>
+      ${metricHead}</tr></thead><tbody>${allianceRows}</tbody></table></div></div></section>
+
+    <section><h2>Member Rankings</h2>
+      <div class="controls">
+        <input type="search" id="q" placeholder="Search name or governor ID"
+               value="${esc(VIEW.q)}" aria-label="Search members">
+        <span class="chipbar" id="allyChips">
+          <span class="chip ${VIEW.alliance ? "" : "on"}" tabindex="0" data-ally="">All</span>
+          ${r.alliances.map(a => `<span class="chip ${VIEW.alliance === a.tag ? "on" : ""}"
+            tabindex="0" data-ally="${esc(a.tag)}">${esc(a.tag)}</span>`).join("")}
+
+        </span>
+
+        <select id="tierSel" aria-label="Filter by tier">
+          <option value="">All tiers</option>
+
+          ${TIER_ORDER.map(t => `<option value="${t}" ${VIEW.tier === t ? "selected" : ""}
+            >${t} tier</option>`).join("")}
+        </select>
+
+        <select id="flagSel" aria-label="Filter by status">
+          ${[["", "All members"], ["DEAD", "Kick candidates"], ["INACTIVE", "Inactive"],
+             ["LOW", "Low activity"], ["NO SUPPORT", "No support given"],
+             ["NO BASELINE", "No baseline"]].map(([v, l]) =>
+            `<option value="${v}" ${VIEW.flag === v ? "selected" : ""}>${l}</option>`).join("")}
+        </select>
+
+        <span class="topx">
+          <label for="topXInput">Top</label>
+
+          <input type="number" id="topXInput" min="1" max="${ms.length}" step="1"
+                 value="${VIEW.topX}" aria-label="Number of top members to export">
+          <button id="topXBtn" class="primary">Export Top Members</button>
+
+        </span>
+
+        <span class="count">${rows.length} shown</span>
+
+      </div>
+
+      <div class="panel"><div class="scroll"><table id="memberTable">
+        <thead><tr>${COLS.map(c => `<th data-k="${c.k}" class="${c.n ? "num" : ""} ${
+          c.k === VIEW.sortKey ? "sorted " + (VIEW.sortAsc ? "asc" : "") : ""}">${esc(c.t)}</th>`)
+          .join("")}</tr></thead>
+        <tbody>${rows.map(m => `<tr class="expander ${sevOf(m)}" data-id="${m.governor_id}">${
+          COLS.map(c => `<td class="${c.n ? "num" : ""} ${c.cls || ""}">${c.f(m)}</td>`)
+
+          .join("")}</tr>`).join("")}
+
+        </tbody></table></div></div>
+      <p class="note">Click any row for the full scorecard and week-by-week history.</p>
+
+    </section>
+
+    <div class="split">
+      <section><h2>Action List</h2><div class="panel"><div class="scroll" style="max-height:430px">
+
+        <table id="actionTable"><thead><tr><th>Ally</th><th>Governor</th><th class="num">Score</th><th>Tier</th>
+        <th class="num">Idle</th><th class="num">Power</th><th>Why</th></tr></thead>
+
+        <tbody>${actionRows || '<tr><td colspan="7">Nothing flagged &ndash; clean week.</td></tr>'}
+        </tbody></table></div>
+
+        <p class="note" style="padding:0 12px 10px">Click a row for their full
+        scorecard.</p></div></section>
+
+      <section><h2>Departures (${left.length})</h2>
+
+        <div class="panel"><div class="scroll" style="max-height:430px">
+        <table><thead><tr><th>Was in</th><th>Governor</th><th class="num">Power</th>
+
+        <th class="num">Last score</th><th>Tier</th></tr></thead>
+        <tbody>${depRows || '<tr><td colspan="5">' + (r.hasPrevious ?
+          "Nobody left since last week." : "Tracked once a second week is loaded.") +
+          "</td></tr>"}</tbody></table></div></div></section>
+
+    </div>
+
+    <section><h2>How The Score Works</h2><div class="panel" style="padding:17px 19px">
+
+      <div class="grid2">
+        <div><b>Weighting</b>${r.metrics.map(k => `
+
+          <div class="mrow"><span class="lbl">${esc(METRIC_LABELS[k] || k)}</span>
+
+          <span class="mini"><i style="width:${STATE.config.weights[k] / wTotal * 100}%"></i></span>
+          <span class="val">${(STATE.config.weights[k] / wTotal * 100).toFixed(0)}%</span></div>`).join("")}
+        </div>
+        <div><b>Method</b><div class="note" style="font-size:13px;color:var(--dim);margin-top:5px">
+          ${(() => {
+            const idle = shownMetrics(r).filter(k => !r.metrics.includes(k));
+            if (!idle.length) return "";
+            const names = idle.map(k => METRIC_LABELS[k] || k).join(" and ");
+            return `<b>${names}</b> ${idle.length > 1 ? "are" : "is"} not counted this
+
+              week: ${idle.length > 1 ? "they are" : "it is"} a running total, and there
+              is no earlier week to measure the gain against.
+              ${idle.length > 1 ? "Their" : "Its"} weight is shared out across the other
+              stats until a second week is added. `;
+          })()}
+          ${r.usesDelta ? "A <b>+</b> column is what that stat scores on: the gain since " +
+            "last week, not the running total beside it. Someone who added 20M kill " +
+            "points outranks someone sitting on 100M who added 10M. " : ""}
+          Each stat becomes a 0&ndash;100 score on the <b>${esc(STATE.config.scoring.curve)}</b>
+          curve, measured against everyone in the kingdom, combined using the weights at
+          left, then multiplied by an inactivity factor. Tiers are cut by percentile:
+          S is the top 10%, F the bottom 10%.
+        </div></div>
+      </div></div></section>`;
+
+  const q = $("q");
+  q.oninput = () => {
+    VIEW.q = q.value.trim().toLowerCase();
+    const pos = q.selectionStart; render();
+    const nq = $("q"); nq.focus(); nq.setSelectionRange(pos, pos);
+  };
+  $("tierSel").onchange = e => { VIEW.tier = e.target.value; render(); };
+  $("flagSel").onchange = e => { VIEW.flag = e.target.value; render(); };
+  $("topXInput").onchange = e => {
+    VIEW.topX = Math.max(1, Math.min(ms.length, Math.round(+e.target.value) || VIEW.topX));
+    e.target.value = VIEW.topX;
+  };
+  $("topXBtn").onclick = exportTopX;
+  $("allyChips").querySelectorAll("[data-ally]").forEach(c => {
+    const go = () => { VIEW.alliance = c.dataset.ally; render(); };
+    c.onclick = go;
+    c.onkeydown = e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); go(); } };
+  });
+  document.querySelectorAll("#memberTable th").forEach(th => th.onclick = () => {
+    const k = th.dataset.k;
+    if (k === VIEW.sortKey) VIEW.sortAsc = !VIEW.sortAsc;
+    else { VIEW.sortKey = k; VIEW.sortAsc = ["rank_overall", "name", "alliance_tag"].includes(k); }
+    render();
+  });
+
+  [["#memberTable", COLS.length], ["#actionTable", 7]].forEach(([sel, span]) => {
+    document.querySelectorAll(sel + " tr.expander").forEach(tr => tr.onclick = () => {
+      const next = tr.nextElementSibling;
+      if (next && next.classList.contains("detail")) { next.remove(); return; }
+      document.querySelectorAll("tr.detail").forEach(d => d.remove());
+      const m = ms.find(x => String(x.governor_id) === tr.dataset.id);
+      if (m) tr.insertAdjacentHTML("afterend", detailRow(m, r, span));
+    });
+  });
+
+  spreadColumns();
+
+  $("footer").textContent = STATE.weeks.length + " week(s) loaded: " +
+    SCORED.map(x => x.label).join(", ");
+}
+
+let resizeTimer = null;
+window.addEventListener("resize", () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(spreadColumns, 120);
+});
+
+function detailRow(m, r, span) {
+  const isDelta = k => r.metricModes[k] === "delta";
+  const cats = Object.entries(m.categories).map(([k, v]) =>
+    `<div class="mrow"><span class="lbl">${esc(k)}</span>
+     <span class="mini"><i style="width:${v}%"></i></span>
+     <span class="val">${v.toFixed(1)}</span></div>`).join("");
+  const mets = shownMetrics(r).map(k => {
+    const scored = m["score_" + k] || 0;
+    return `<div class="mrow"><span class="lbl">${esc(METRIC_LABELS[k] || k)}</span>
+     <span class="mini"><i style="width:${scored}%"></i></span>
+     <span class="val">${fmt(m["eff_" + k] || 0)}${isDelta(k) ?
+       ` <span class="flat">/${fmt(m["total_" + k])}</span>` : ""}</span></div>`;
+  }).join("");
+  const hist = SCORED.map(w => {
+    const him = w.members.find(x => x.governor_id === m.governor_id);
+    return him ? `<div class="mrow"><span class="lbl">${esc(w.label)}</span>
+      <span class="mini"><i style="width:${him.score}%"></i></span>
+      <span class="val">${him.score.toFixed(1)}
+      <span class="tier ${him.tier}" style="min-width:15px">${him.tier}</span></span></div>` : "";
+  }).join("");
+  return `<tr class="detail"><td colspan="${span}"><div class="grid2">
+    <div><b>Category scores</b>${cats}</div>
+    <div><b>Metric detail</b>${mets}</div>
+    <div><b>Week history</b>${SCORED.length > 1 ? hist :
+      '<div class="note">Only one week loaded so far.</div>'}
+      <div class="note" style="margin-top:11px">Governor ID ${m.governor_id} &middot;
+        power ${fmt(m.power)}${m.power_growth ? " (+" + fmt(m.power_growth) + ")" : ""} &middot;
+        CH ${m.city_hall || "?"}<br>idle ${m.days_inactive} d &middot;
+        overall #${m.rank_overall}, #${m.rank_in_alliance} in ${esc(m.alliance_tag)}</div>
+    </div></div></td></tr>`;
+}
+
+function downloadBytes(bytes, filename, mime) {
+  const url = URL.createObjectURL(new Blob([bytes], { type: mime || "application/octet-stream" }));
+  const a = document.createElement("a");
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 4000);
+}
+
+async function downloadBackup() {
+  const payload = JSON.stringify({
+    version: 1, config: STATE.config, weeks: STATE.weeks.map(w => packWeek(w)),
+  });
+  const name = "warroom-backup-" + new Date().toISOString().slice(0, 10) + ".json";
+  if (Store.mode === "artifact") {
+    const dl = typeof claude !== "undefined" && claude.use ? await claude.use("downloads") : null;
+    if (!dl) return notice("Downloads are not available in this view.", true);
+    try { await dl.save({ filename: name, data: payload }); }
+    catch (e) {
+      if (e && e.code !== "declined")
+        notice("Could not download: " + (e.message || e.code), true);
+    }
+    return;
+  }
+  downloadBytes(new TextEncoder().encode(payload), name, "application/json");
+}
+
+async function exportTopX() {
+  const r = SCORED[VIEW.weekIndex];
+  if (!r || !r.members.length) return;
+  const input = $("topXInput");
+  const n = Math.max(1, Math.min(r.members.length, Math.round(+input.value) || VIEW.topX));
+  VIEW.topX = n; input.value = n;
+
+  const lines = ["Top " + n + " Users:"];
+  r.members.slice(0, n).forEach((m, i) => lines.push((i + 1) + ". " + m.name));
+  const text = lines.join("\n") + "\n";
+  const name = "top-" + n + "-" + cls(r.label).toLowerCase() + ".txt";
+  if (Store.mode === "artifact") {
+    const dl = typeof claude !== "undefined" && claude.use ? await claude.use("downloads") : null;
+    if (!dl) return notice("Downloads are not available in this view.", true);
+    try { await dl.save({ filename: name, data: text }); }
+    catch (e) {
+      if (e && e.code !== "declined")
+        notice("Could not download: " + (e.message || e.code), true);
+    }
+    return;
+  }
+  downloadBytes(new TextEncoder().encode(text), name, "text/plain");
+}
+
+async function restoreBackup(file) {
+  try {
+    const raw = JSON.parse(await file.text());
+    if (!raw || !Array.isArray(raw.weeks)) throw new Error("not a war room backup");
+    STATE = {
+      version: raw.version || 1,
+      config: mergeConfig(raw.config),
+      weeks: raw.weeks.map(unpackWeek),
+    };
+    recompute(); render(); queueSave();
+    notice("Backup restored: " + STATE.weeks.length + " week(s).", false);
+  } catch (e) {
+    notice("That backup could not be read: " + e.message, true);
+  }
+}
+
+$("pickBtn").onclick = () => $("picker").click();
+$("picker").onchange = e => { addFiles(e.target.files); e.target.value = ""; };
+const drop = $("drop");
+["dragenter", "dragover"].forEach(ev => drop.addEventListener(ev, e => {
+  e.preventDefault(); drop.classList.add("over");
+}));
+["dragleave", "drop"].forEach(ev => drop.addEventListener(ev, e => {
+  e.preventDefault(); drop.classList.remove("over");
+}));
+drop.addEventListener("drop", e => { if (e.dataTransfer?.files) addFiles(e.dataTransfer.files); });
+$("backupBtn").onclick = downloadBackup;
+$("restoreBtn").onclick = () => $("restorePicker").click();
+$("restorePicker").onchange = e => {
+  if (e.target.files[0]) restoreBackup(e.target.files[0]);
+  e.target.value = "";
+};
+$("resetCfg").onclick = () => {
+  if (!confirm("Reset every weight and threshold to the defaults?")) return;
+  STATE.config = structuredClone(DEFAULT_CONFIG);
+  recompute(); render(); queueSave();
+};
+
+(async () => {
+  await Store.detect();
+  await load();
+  recompute();
+  render();
+  const where = {
+    artifact: "Shared with everyone who can edit this page.",
+    server: "Saving to this site's server, shared with everyone.",
+    local: "No server here, so weeks are saved in this browser only. " +
+           "Use Download backup to move them.",
+    none: "This page cannot save anything.",
+  }[Store.mode];
+  $("storeMode").textContent = where;
+  if (Store.mode === "none") goReadOnly(where, false);
+  if (Store.mode === "server" && Store.auth === "required") {
+    goReadOnly(null, true);
+    loginPrompt("This site is read-only until you log in.");
+  }
+  if (!STATE.weeks.length) $("dataTool").open = true;
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow, noarchive">
+<meta name="referrer" content="no-referrer">
+<title>myprojects</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%230a0a0a'/><rect x='14' y='14' width='4' height='4' fill='%23fafafa'/></svg>">
+<style>
+  :root{
+    --bg:#0a0a0a;
+    --line:#1f1f1f;
+    --text:#fafafa;
+    --muted:#a3a3a3;
+    --faint:#6b6b6b;
+    --sans:ui-sans-serif,-apple-system,"Segoe UI",Inter,Roboto,system-ui,sans-serif;
+    --mono:ui-monospace,"SF Mono","Cascadia Mono",Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);
+    font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased;
+    min-height:100dvh;display:flex;align-items:center;justify-content:center;
+    padding:32px 24px;
+  }
+  main{width:100%;max-width:440px}
+
+  .mark{font-family:var(--mono);font-size:11px;color:var(--faint);
+        letter-spacing:.08em;margin:0 0 44px;text-transform:uppercase}
+
+  a.row{
+    display:flex;align-items:baseline;justify-content:space-between;gap:20px;
+    text-decoration:none;color:var(--muted);padding:19px 0;
+    border-top:1px solid var(--line);
+    transition:color .18s ease,padding-left .18s ease;
+  }
+  a.row:last-of-type{border-bottom:1px solid var(--line)}
+  a.row:hover,a.row:focus-visible{color:var(--text);padding-left:7px;outline:none}
+
+  .name{font-size:17px;font-weight:500;letter-spacing:-.015em;color:inherit}
+  .at{font-family:var(--mono);font-size:11px;color:var(--faint);
+      opacity:0;transform:translateX(-5px);
+      transition:opacity .18s ease,transform .18s ease}
+  a.row:hover .at,a.row:focus-visible .at{opacity:1;transform:none}
+
+  footer{margin-top:40px;font-family:var(--mono);font-size:10.5px;color:var(--faint)}
+
+  .in{opacity:0;animation:in .5s ease forwards}
+  @keyframes in{to{opacity:1}}
+  @media (prefers-reduced-motion:reduce){
+    .in{animation:none;opacity:1}
+    a.row,.at{transition:none}
+  }
+</style>
+</head>
+<body>
+  <main>
+    <p class="mark in">myprojects.cc</p>
+
+    <a class="row in" style="animation-delay:.06s" href="https://lol.myprojects.cc/">
+      <span class="name">League Vault</span>
+      <span class="at">lol</span>
+    </a>
+
+    <a class="row in" style="animation-delay:.12s" href="https://rok.myprojects.cc/">
+      <span class="name">Kingdom War Room</span>
+      <span class="at">rok</span>
+    </a>
+
+    <footer class="in" style="animation-delay:.2s">both ask for a password</footer>
+  </main>
+</body>
+</html>
