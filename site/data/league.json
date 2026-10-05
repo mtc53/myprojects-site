@@ -1,0 +1,14 @@
+{
+  "project": "league",
+  "title": "League Vault",
+  "updated": "2026-10-05T00:00:00Z",
+  "status": "offline",
+  "summary": "Waiting for the first publish from the League Vault app.",
+  "stats": [
+    { "label": "Accounts", "value": "—" },
+    { "label": "Ranked", "value": "—" },
+    { "label": "Flagged", "value": "—" }
+  ],
+  "note": "Placeholder seed data. League Vault overwrites this on each refresh.",
+  "source": "https://github.com/mtc53/league-vault"
+}

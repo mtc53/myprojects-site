@@ -1,0 +1,36 @@
+name: Accept published data
+
+# A project can publish its data without push access to this repo: it fires a
+# repository_dispatch of type "publish-data" with { project, data } in the
+# payload. This workflow validates the slug, writes site/data/<project>.json,
+# commits it, and the push triggers Deploy site. Projects that prefer to commit
+# directly (with a token) can skip this and just push to site/data/.
+on:
+  repository_dispatch:
+    types: [publish-data]
+
+permissions:
+  contents: write
+
+jobs:
+  write:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Write data file
+        env:
+          PROJECT: ${{ github.event.client_payload.project }}
+          DATA: ${{ toJSON(github.event.client_payload.data) }}
+        run: |
+          case "$PROJECT" in
+            league|warroom|osrs) ;;
+            *) echo "unknown project: $PROJECT" >&2; exit 1 ;;
+          esac
+          printf '%s' "$DATA" | python3 -m json.tool > "site/data/$PROJECT.json"
+      - name: Commit
+        run: |
+          git config user.name "myprojects-bot"
+          git config user.email "bot@users.noreply.github.com"
+          git add site/data/
+          git diff --cached --quiet || git commit -m "data: update ${{ github.event.client_payload.project }}"
+          git push

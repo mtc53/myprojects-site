@@ -1,0 +1,13 @@
+{
+  "project": "warroom",
+  "title": "Kingdom War Room",
+  "updated": "2026-10-05T00:00:00Z",
+  "status": "offline",
+  "summary": "Waiting for the first rankings export from the War Room.",
+  "stats": [
+    { "label": "Governors", "value": "—" },
+    { "label": "Week", "value": "—" }
+  ],
+  "note": "Placeholder seed data. The War Room overwrites this when a week is scored.",
+  "source": "https://github.com/mtc53/rok-ranking-assistant"
+}

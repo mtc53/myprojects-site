@@ -1,20 +1,12 @@
-# myprojects.cc - all three sites, one machine, one folder.
+# myprojects.cc — the whole site is now static, served from one folder, with
+# no password. GitHub Pages is the default host (see .github/workflows/deploy.yml);
+# this file is only for self-hosting the same static output behind Caddy.
 #
-# Paths are relative to this file, so the folder works wherever you put it.
-# Caddy owns 80 and 443 and gets its own certificates, so win-acme is no
-# longer involved. The War Room runs on 127.0.0.1:8081, reachable only
-# through here.
-#
-# The password hash comes from:  caddy hash-password
+# There is no backend and no basic_auth anymore. The War Room, League Vault and
+# the bot publish JSON into site/data/ out of band; Caddy just serves files.
 
 {
 	email you@example.com
-}
-
-(locked) {
-	basic_auth {
-		user PUT_YOUR_HASH_HERE
-	}
 }
 
 (hardened) {
@@ -29,32 +21,10 @@
 myprojects.cc, www.myprojects.cc {
 	import hardened
 	root * site
-	file_server
-}
-
-lol.myprojects.cc {
-	import locked
-	import hardened
-	header X-Robots-Tag "noindex, nofollow"
-
-	# What League Vault publishes, served under /vault/ so the wrapper
-	# around it survives the next publish.
-	handle_path /vault* {
-		root * lol
-		file_server {
-			index index.html dashboard.html
-		}
+	file_server {
+		index index.html
 	}
-
-	handle {
-		root * lolwrap
-		file_server
-	}
-}
-
-rok.myprojects.cc {
-	import locked
-	import hardened
-	header X-Robots-Tag "noindex, nofollow"
-	reverse_proxy 127.0.0.1:8081
+	# never cache the data files, so a fresh publish shows immediately
+	@data path /data/*
+	header @data Cache-Control "no-store"
 }

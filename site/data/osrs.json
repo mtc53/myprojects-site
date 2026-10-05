@@ -1,0 +1,13 @@
+{
+  "project": "osrs",
+  "title": "OSRS Bot",
+  "updated": "2026-10-05T00:00:00Z",
+  "status": "offline",
+  "summary": "Waiting for the first status report from the bot.",
+  "stats": [
+    { "label": "Session", "value": "—" },
+    { "label": "Task", "value": "—" }
+  ],
+  "note": "Placeholder seed data. The bot overwrites this while it runs.",
+  "source": "https://github.com/mtc53/osrs-bot"
+}
